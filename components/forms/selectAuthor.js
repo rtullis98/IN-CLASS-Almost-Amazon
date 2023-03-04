@@ -1,12 +1,12 @@
 import { getAuthors } from '../../api/authorData';
 import renderToDOM from '../../utils/renderToDom';
 
-const selectAuthor = (authorId) => {
+const selectAuthor = (user, authorId) => {
   let domString = `<label for="author">Select an Author</label>
     <select class="form-control" id="author_id" required>
     <option value="">Select an Author</option>`;
 
-  getAuthors().then((authorsArray) => {
+  getAuthors(user).then((authorsArray) => {
     authorsArray.forEach((author) => {
       domString += `
           <option 
