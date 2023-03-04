@@ -1,34 +1,51 @@
-import clearDom from '../utils/clearDom';
-import renderToDOM from '../utils/renderToDom';
+import { getAuthors, getFavoriteAuthors } from '../api/authorData';
+import { getBooks, booksOnSale } from '../api/bookData';
+import { showBooks } from '../pages/books';
+import { signOut } from '../utils/auth';
+import { showAuthors } from '../pages/authors';
 
-const emptyAuthors = () => {
-  const domString = '<h1>No Authors</h1>';
-  renderToDOM('#store', domString);
-};
+// navigation events
+const navigationEvents = (user) => {
+  // LOGOUT BUTTON
+  document.querySelector('#logout-button')
+    .addEventListener('click', signOut);
 
-const showAuthors = (array) => {
-  clearDom();
-
-  const btnString = '<button class="btn btn-success btn-lg mb-4" id="add-author-btn">Add An Author</button>';
-
-  renderToDOM('#add-button', btnString);
-
-  let domString = '';
-  array.forEach((item) => {
-    domString += `
-    <div class="card" style="width: 18rem;">
-      <div class="card-body">
-        <h5 class="card-title">${item.first_name} ${item.last_name}</h5>
-        <h6 class="card-subtitle mb-2 text-muted">${item.email}</h6>
-        <hr>
-        <i class="btn btn-success fas fa-eye" id="view-author-btn--${item.firebaseKey}"></i>
-        <i class="fas fa-edit btn btn-info" id="update-author--${item.firebaseKey}"></i>
-        <i class="btn btn-danger fas fa-trash-alt" id="delete-author-btn--${item.firebaseKey}"></i>
-      </div>
-    </div>
-    `;
+  // TODO: BOOKS ON SALE
+  document.querySelector('#sale-books').addEventListener('click', () => {
+    booksOnSale(user.uid).then(showBooks);
   });
-  renderToDOM('#store', domString);
+
+  // TODO: ALL BOOKS
+  document.querySelector('#all-books').addEventListener('click', () => {
+    getBooks(user.uid).then(showBooks);
+  });
+
+  // FIXME: STUDENTS Create an event listener for the Authors
+  // 1. When a user clicks the authors link, make a call to firebase to get all authors
+  // 2. Convert the response to an array because that is what the makeAuthors function is expecting
+  // 3. If the array is empty because there are no authors, make sure to use the emptyAuthor function
+  document.querySelector('#authors').addEventListener('click', () => {
+    getAuthors(user.uid).then(showAuthors);
+  });
+
+  // STRETCH: SEARCH
+  document.querySelector('#search').addEventListener('keyup', (e) => {
+    const searchValue = document.querySelector('#search').value.toLowerCase();
+    console.warn(searchValue);
+
+    // WHEN THE USER PRESSES ENTER, MAKE THE API CALL AND CLEAR THE INPUT
+    if (e.keyCode === 13) {
+      // MAKE A CALL TO THE API TO FILTER ON THE BOOKS
+      // IF THE SEARCH DOESN'T RETURN ANYTHING, SHOW THE EMPTY STORE
+      // OTHERWISE SHOW THE STORE
+
+      document.querySelector('#search').value = '';
+    }
+  });
+  // get favorite authors
+  document.querySelector('#favorite-authors').addEventListener('click', () => {
+    getFavoriteAuthors(user.uid).then(showAuthors);
+  });
 };
 
-export { showAuthors, emptyAuthors };
+export default navigationEvents;
